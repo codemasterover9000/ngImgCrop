@@ -2,10 +2,10 @@
  * ngImgCrop v0.3.2
  * https://github.com/alexk111/ngImgCrop
  *
- * Copyright (c) 2014 Alex Kaul
+ * Copyright (c) 2017 Alex Kaul
  * License: MIT
  *
- * Generated at Wednesday, December 3rd, 2014, 3:54:12 PM
+ * Generated at Friday, December 8th, 2017, 3:00:40 PM
  */
 (function() {
 'use strict';
@@ -1531,6 +1531,19 @@ crop.factory('cropHost', ['$document', 'cropAreaCircle', 'cropAreaSquare', 'crop
       }
     };
 
+    this.getResultImageCoordinates=function() {
+      return {
+        srcX: (theArea.getX()-theArea.getSize()/2)*(image.width/ctx.canvas.width),
+        srcY: (theArea.getY()-theArea.getSize()/2)*(image.height/ctx.canvas.height),
+        srcW: theArea.getSize()*(image.width/ctx.canvas.width),
+        srcH: theArea.getSize()*(image.height/ctx.canvas.height),
+        dstX: 0,
+        dstY: 0,
+        dstW: resImgSize,
+        dstH: resImgSize
+      }
+    }
+
     this.getResultImageDataURI=function() {
       var temp_ctx, temp_canvas;
       temp_canvas = angular.element('<canvas></canvas>')[0];
@@ -1763,6 +1776,7 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
     scope: {
       image: '=',
       resultImage: '=',
+      resultImageCoordinates: '=',
 
       changeOnFly: '=',
       areaType: '@',
@@ -1789,15 +1803,21 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
 
       // Store Result Image to check if it's changed
       var storedResultImage;
+      var storedResultImageCoordinates;
 
       var updateResultImage=function(scope) {
         var resultImage=cropHost.getResultImageDataURI();
+        var resultCoordinates=cropHost.getResultImageCoordinates();
         if(storedResultImage!==resultImage) {
           storedResultImage=resultImage;
+          storedResultImageCoordinates=resultCoordinates;
           if(angular.isDefined(scope.resultImage)) {
             scope.resultImage=resultImage;
           }
-          scope.onChange({$dataURI: scope.resultImage});
+          if(angular.isDefined(scope.resultImageCoordinates)) {
+            scope.resultImageCoordinates=resultCoordinates;
+          }
+          scope.onChange({$dataURI: scope.resultImage, $dataCoordinates: scope.resultImageCoordinates});
         }
       };
 
