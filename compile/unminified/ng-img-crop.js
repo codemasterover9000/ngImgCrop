@@ -5,7 +5,7 @@
  * Copyright (c) 2017 Alex Kaul
  * License: MIT
  *
- * Generated at Friday, December 8th, 2017, 3:00:40 PM
+ * Generated at Monday, December 11th, 2017, 4:56:43 PM
  */
 (function() {
 'use strict';
@@ -1559,8 +1559,9 @@ crop.factory('cropHost', ['$document', 'cropAreaCircle', 'cropAreaSquare', 'crop
       return temp_canvas.toDataURL(resImgFormat);
     };
 
-    this.setNewImageSource=function(imageSource) {
+    this.setNewImageSource=function(imageSource, allowRotatingImage) {
       image=null;
+      allowRotatingImage = (allowRotatingImage === undefined) ? false : allowRotatingImage;
       resetCropHost();
       events.trigger('image-updated');
       if(!!imageSource) {
@@ -1574,7 +1575,7 @@ crop.factory('cropHost', ['$document', 'cropAreaCircle', 'cropAreaSquare', 'crop
           cropEXIF.getData(newImage,function(){
             var orientation=cropEXIF.getTag(newImage,'Orientation');
 
-            if([3,6,8].indexOf(orientation)>-1) {
+            if([3,6,8].indexOf(orientation)>-1 && allowRotatingImage) {
               var canvas = document.createElement("canvas"),
                   ctx=canvas.getContext("2d"),
                   cw = newImage.width, ch = newImage.height, cx = 0, cy = 0, deg=0;
@@ -1778,6 +1779,7 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
       resultImage: '=',
       resultImageCoordinates: '=',
 
+      allowRotatingImage: '=?',
       changeOnFly: '=',
       areaType: '@',
       areaMinSize: '=',
@@ -1793,6 +1795,14 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
     template: '<canvas></canvas>',
     controller: ['$scope', function($scope) {
       $scope.events = new CropPubSub();
+      var self = this;
+      this.$onInit = function()
+      {
+          if (self.allowRotatingImage === undefined)
+          {
+              self.allowRotatingImage = false;
+          }
+      };
     }],
     link: function(scope, element/*, attrs*/) {
       // Init Events Manager
@@ -1854,7 +1864,7 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
 
       // Sync CropHost with Directive's options
       scope.$watch('image',function(){
-        cropHost.setNewImageSource(scope.image);
+        cropHost.setNewImageSource(scope.image, scope.allowRotatingImage);
       });
       scope.$watch('areaType',function(){
         cropHost.setAreaType(scope.areaType);

@@ -191,8 +191,9 @@ crop.factory('cropHost', ['$document', 'cropAreaCircle', 'cropAreaSquare', 'crop
       return temp_canvas.toDataURL(resImgFormat);
     };
 
-    this.setNewImageSource=function(imageSource) {
+    this.setNewImageSource=function(imageSource, allowRotatingImage) {
       image=null;
+      allowRotatingImage = (allowRotatingImage === undefined) ? false : allowRotatingImage;
       resetCropHost();
       events.trigger('image-updated');
       if(!!imageSource) {
@@ -206,7 +207,7 @@ crop.factory('cropHost', ['$document', 'cropAreaCircle', 'cropAreaSquare', 'crop
           cropEXIF.getData(newImage,function(){
             var orientation=cropEXIF.getTag(newImage,'Orientation');
 
-            if([3,6,8].indexOf(orientation)>-1) {
+            if([3,6,8].indexOf(orientation)>-1 && allowRotatingImage) {
               var canvas = document.createElement("canvas"),
                   ctx=canvas.getContext("2d"),
                   cw = newImage.width, ch = newImage.height, cx = 0, cy = 0, deg=0;

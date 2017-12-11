@@ -8,6 +8,7 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
       resultImage: '=',
       resultImageCoordinates: '=',
 
+      allowRotatingImage: '=?',
       changeOnFly: '=',
       areaType: '@',
       areaMinSize: '=',
@@ -23,6 +24,14 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
     template: '<canvas></canvas>',
     controller: ['$scope', function($scope) {
       $scope.events = new CropPubSub();
+      var self = this;
+      this.$onInit = function()
+      {
+          if (self.allowRotatingImage === undefined)
+          {
+              self.allowRotatingImage = false;
+          }
+      };
     }],
     link: function(scope, element/*, attrs*/) {
       // Init Events Manager
@@ -84,7 +93,7 @@ crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function($timeo
 
       // Sync CropHost with Directive's options
       scope.$watch('image',function(){
-        cropHost.setNewImageSource(scope.image);
+        cropHost.setNewImageSource(scope.image, scope.allowRotatingImage);
       });
       scope.$watch('areaType',function(){
         cropHost.setAreaType(scope.areaType);
